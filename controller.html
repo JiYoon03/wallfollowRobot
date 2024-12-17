@@ -1,0 +1,231 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ESP32C3 Web Server</title>
+    <style>
+        body {
+            margin-top: 0px;
+            margin-bottom: 0px;
+            margin-left: 10%;
+            margin-right: 10%;
+        }
+
+        .button {
+            padding: 5% 7%;
+            font-size: 100%;
+            text-align: center;
+            cursor: pointer;
+            outline: none;
+            color: #ffffff;
+            background-color: #3168cf;
+            border: none;
+            border-radius: 10px;
+            box-shadow: 0 5px #999;
+            margin-left: 5px;
+            margin-right: 5px;
+            margin-top: 5px;
+            margin-bottom: 5px;
+        }
+
+        .active {
+            background-color: #009f05;
+            box-shadow: 0 2px #666;
+            transform: translateY(4px);
+        }
+
+        .slider {
+            width: 50%;
+            height: 15px;
+            border-radius: 5px;
+            outline: none;
+            opacity: 0.7;
+            -webkit-transition: 0.2s;
+            transition: opacity 0.2s;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>ESP32C3 Web Server</h1>
+    <p style="text-align: center">Group 6 @ Lab 29</p>
+    <p style="text-align: center">Jazmyn James, JiYoon Kang, Anthony Kim</p>
+
+    <h2>Connection Info</h2>
+    <p>Delay: <span id="delay">20</span> ms</p>
+    <p>Battery Voltage: <span id="battery_voltage">6</span> V</p>
+
+    <h2>Direction</h2>
+
+    <h2>Direction</h2>
+    <div style="text-align: center">
+        <button id="forward_button"
+                class="button"
+                onclick="activateDirectionButtons('forward_button')">
+            F
+        </button>
+    </div>
+    <div style="text-align: center">
+        <button id="left_button"
+                class="button"
+                onclick="activateDirectionButtons('left_button')">
+            L
+        </button>
+        <button id="stop_button"
+                class="button"
+                onclick="activateDirectionButtons('stop_button')">
+            O
+        </button>
+        <button id="right_button"
+                class="button"
+                onclick="activateDirectionButtons('right_button')">
+            R
+        </button>
+    </div>
+    <div style="text-align: center">
+        <button id="backward_button"
+                class="button"
+                onclick="activateDirectionButtons('backward_button')">
+            B
+        </button>
+    </div>
+
+    <h2>Turn Rate Control</h2>
+    <div style="text-align: center">
+        <input type="range" min="0" max="100" value="20" class="slider" id="turn_rate_slider" onchange="displayTurnRate()" />
+    </div>
+    <p>Turn rate: <span id="turn_rate_val"></span>%</p>
+
+    <h2>Speed Control</h2>
+    <div style="text-align: center">
+        <input type="range" min="1600" max="4095" value="4000" class="slider" id="speed_slider" onchange="displaySpeed()" />
+    </div>
+    <p>Speed: <span id="speed_val"></span></p>
+
+    <h2>Autopilot</h2>
+    <div style="text-align: center">
+        <button id="autopilot_on_button" class="button" onclick="activateAutopilotButton('autopilot_on_button')">Autopilot On</button>
+        <button id="autopilot_off_button" class="button" onclick="activateAutopilotButton('autopilot_off_button')">Autopilot Off</button>
+    </div>
+
+    <script>
+        // Send a GET request to the ESP32C3 (Arduino) for each action
+        function sendRequest(action) {
+            var xhttp = new XMLHttpRequest();
+            xhttp.open("GET", "/" + action, true); // Sends the action (F, O, B, autopilot_on, etc.)
+
+            xhttp.onload = function () {
+                if (xhttp.status == 200) {
+                    console.log("Request successful: " + action);
+                } else {
+                    console.error("Request failed with status: " + xhttp.status);
+                }
+            };
+
+            xhttp.onerror = function () {
+                console.error("Request failed");
+            };
+
+            xhttp.send();
+        }
+
+
+        // Direction Button Activation Logic
+        function activateDirectionButtons(buttonId) {
+            // get the button element by id
+            var forward_button = document.getElementById("forward_button");
+            var backward_button = document.getElementById("backward_button");
+            var left_button = document.getElementById("left_button");
+            var right_button = document.getElementById("right_button");
+            var stop_button = document.getElementById("stop_button");
+
+            removeAllActiveDirectionButtons(); // remove all active class from the buttons
+
+            if (buttonId == "forward_button") {
+                //removeAllActiveDirectionButtons(); // remove all active class from the buttons
+                forward_button.classList.add("active"); // add active class to the button
+                var xhttp = new XMLHttpRequest();
+                xhttp.open("GET", "F", true);
+                xhttp.send();
+            }
+
+            if (buttonId == "left_button") {
+                //removeAllActiveDirectionButtons();
+                left_button.classList.add("active");
+                var xhttp = new XMLHttpRequest();
+                xhttp.open("GET", "L", true);
+                xhttp.send();
+            }
+
+            if (buttonId == "stop_button") {
+                //removeAllActiveDirectionButtons();
+                stop_button.classList.add("active");
+                var xhttp = new XMLHttpRequest();
+                xhttp.open("GET", "O", true);
+                xhttp.send();
+            }
+
+            if (buttonId == "right_button") {
+                //removeAllActiveDirectionButtons();
+                right_button.classList.add("active");
+                var xhttp = new XMLHttpRequest();
+                xhttp.open("GET", "R", true);
+                xhttp.send();
+            }
+
+            if (buttonId == "backward_button") {
+                //removeAllActiveDirectionButtons();
+                backward_button.classList.add("active");
+                var xhttp = new XMLHttpRequest();
+                xhttp.open("GET", "B", true);
+                xhttp.send();
+            }
+        }
+
+        function removeAllActiveDirectionButtons() {
+            var forward_button = document.getElementById("forward_button");
+            var backward_button = document.getElementById("backward_button");
+            var left_button = document.getElementById("left_button");
+            var right_button = document.getElementById("right_button");
+            var stop_button = document.getElementById("stop_button");
+
+            forward_button.classList.remove("active");
+            backward_button.classList.remove("active");
+            left_button.classList.remove("active");
+            right_button.classList.remove("active");
+            stop_button.classList.remove("active");
+        }
+
+        // Remove active class from both autopilot buttons
+
+        // Update Speed Slider Value
+        function displaySpeed() {
+            var speed_value = document.getElementById("speed_slider").value;
+            document.getElementById("speed_val").innerHTML = speed_value;
+            sendSliderData("speed_slider", speed_value);
+        }
+
+        // Update Turn Rate Slider Value
+        function displayTurnRate() {
+            var turn_rate_value = document.getElementById("turn_rate_slider").value;
+            document.getElementById("turn_rate_val").innerHTML = turn_rate_value;
+            sendSliderData("turn_rate_slider", turn_rate_value);
+        }
+
+        // Send slider data to Arduino via GET request
+        function sendSliderData(sliderId, value) {
+            var xhttp = new XMLHttpRequest();
+            xhttp.open("GET", "/" + sliderId + "=" + value, true); // Sends the slider data (e.g., speed_slider=4000)
+            xhttp.send();
+        }
+
+        // Initialize page with default values
+        window.onload = function () {
+            displaySpeed();   // Initialize speed slider
+            displayTurnRate(); // Initialize turn rate slider
+            sendRequest("O"); // Send "Stop" command to Arduino on load
+        };
+    </script>
+</body>
+</html>
