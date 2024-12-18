@@ -1,3 +1,9 @@
+/*
+ * main.ino for run the wallfollowRobot
+ * Dec 2024
+ * 
+ * JiYoon Kang
+ */
 #include <Wire.h>
 #include <VL53L0X.h>
 #include <WiFi.h>
